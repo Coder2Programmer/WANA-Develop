@@ -7,6 +7,7 @@ some functions.
 import argparse
 import os
 import re
+import time
 import typing
 import z3
 import traceback
@@ -329,15 +330,23 @@ def main():
 
     # Execute all export functions of wasm
     if args.analyse_directory:
-        wasm_files = list_wasm_in_dir(args.analyse_directory[0])
+        wasm_files = list_wasm_in_dir(args.analyse_directory)
+        time_fp = open('output/time.txt', 'w')
+        exception_fp = open('output/exception.txt', 'w')
         for contract_path in wasm_files:
             try:
+                stamp = time.time()
                 func_timeout(args.timeout, execution_and_analyze, args=(contract_path,))
             except FunctionTimedOut:
                 logger.println(f'{contract_path}: time out')
+                exception_fp.write(f'{os.path.basename(contract_path)}#Time Out')
             except Exception as e:
                 logger.debugln(traceback.format_exc())
                 logger.println(f'Error: {e}')
+                exception_fp.write(f'{os.path.basename(contract_path)}#{e}')
+            else:
+                cost_time = time.time() - stamp
+                time_fp.write(f'{os.path.basename(contract_path)}#{cost_time}\n')
 
     # Count the number of instruction
     if args.count_instruction:
@@ -366,8 +375,8 @@ def execution_and_analyze(contract_path):
         logger.debugln(f'invalid contract name {name}: {e}')
 
     try:
-        before_sym_exec(vm, name)
-        detect_fake_eos(vm, name)
+        before_sym_exec(vm, name.split('_')[0])
+        detect_fake_eos(vm, name.split('_')[0])
         after_sym_exec(name)
     except Exception as e:
         logger.println(f'Error: {e}')

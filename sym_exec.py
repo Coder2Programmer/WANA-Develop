@@ -447,7 +447,7 @@ def init_variables(init_constraints: list = ()) -> None:
         recur_depth, loop_depth_dict, path_abort, path_depth, block_number_flag
     solver = z3.Solver()
     solver.add(init_constraints)
-    path_condition = []
+    path_condition = list(init_constraints)
     memory_address_symbolic_variable = {}
     recur_depth = 0
     loop_depth_dict = defaultdict(int)
@@ -809,7 +809,7 @@ def exec_expr(
                 tab = store.tables[module.tableaddrs[0]]
                 while utils.is_symbolic(idx) or idx not in range(len(tab.elem)) or tab.elem[idx] is None:
                     idx = randint(0, len(tab.elem) - 1)
-                    logger.println('Invalid function index in table.')
+                    logger.debugln('Invalid function index in table.')
 
                 if global_vars.location_mode:
                     # found transfer index!

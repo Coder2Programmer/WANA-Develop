@@ -15,10 +15,10 @@ class GlobalVariables:
         self.pc = 0
 
         # global path conditions and path results
-        self.path_conditions_and_results = {"path_conditions": [], "results": []}
+        self.path_conditions_and_results = {"path_conditions": list(), "results": list()}
 
         # last stack
-        self.last_stack = []
+        self.last_stack = list()
 
         # mark the type of smart contract
         self.contract_type = contract_type
@@ -75,7 +75,7 @@ class GlobalVariables:
         self.eosio_token_locals = set()
 
         # loop depth limit
-        self.LOOP_DEPTH_LIMIT = 10
+        self.LOOP_DEPTH_LIMIT = 50
         self.BRANCH_DEPTH_LIMIT = 100000
 
         # unreachable count
