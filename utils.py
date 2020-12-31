@@ -67,22 +67,25 @@ def check_sat(solver: z3.Solver, pop_if_exception: bool = True) -> z3.CheckSatRe
 
 
 def eos_abi_to_int(abi_name: str) -> int:
-    if len(abi_name) > 13:
-        raise Exception('string is too long to be a valid name')
-    if not abi_name:
+    try:
+        if len(abi_name) > 13:
+            raise Exception('string is too long to be a valid name')
+        if not abi_name:
+            return 0
+        value = 0
+        n = min(len(abi_name), 12)
+        for i in range(n):
+            value <<= 5
+            value |= _char_to_value(abi_name[i])
+        value <<= (4 + 5*(12-n))
+        if len(abi_name) == 13:
+            v = _char_to_value(abi_name[12])
+            if v > 0x0F:
+                raise Exception('13th character in name cannot be a letter that comes after j')
+            value |= v
+        return ctypes.c_int64(value).value
+    except Exception as e:
         return 0
-    value = 0
-    n = min(len(abi_name), 12)
-    for i in range(n):
-        value <<= 5
-        value |= _char_to_value(abi_name[i])
-    value <<= (4 + 5*(12-n))
-    if len(abi_name) == 13:
-        v = _char_to_value(abi_name[12])
-        if v > 0x0F:
-            raise Exception('13th character in name cannot be a letter that comes after j')
-        value |= v
-    return ctypes.c_int64(value).value
 
 
 def _char_to_value(c: str) -> int:
@@ -97,24 +100,34 @@ def _char_to_value(c: str) -> int:
 
 
 def gen_symbolic_args(func: 'instance.FunctionInstance'):
-    symbolic_params = []
+    symbolic_params = list()
     for i, e in enumerate(func.functype.args):
         if e == bin_format.i32:
             symbolic_params.append(z3.BitVec(f'i32_bv_{i}', 32))
         elif e == bin_format.i64:
             symbolic_params.append(z3.BitVec(f'i64_bv_{i}', 64))
         elif e == bin_format.f32:
+            # The first approach is bit-vector based
             # f32_bv = z3.BitVec(f'f32_bv_{i}', 32)
             # symbolic_params.append(z3.fpBVToFP(f32_bv, z3.Float32()))
-            # another approach
+            # The second approach is float-point based
             symbolic_params.append(z3.FP(f'f32_{i}', z3.Float32()))
         else:
+            # The first approach is bit-vector based
             # f64_bv = z3.BitVec(f'f64_bv_{i}', 64)
             # symbolic_params.append(z3.fpBVToFP(f64_bv, z3.Float64()))
-            # another approach
+            # The second approach is float-point based
             symbolic_params.append(z3.FP(f'f64_{i}', z3.Float64()))
     return symbolic_params
 
 
-if __name__ == '__main__':
-    print(eos_abi_to_int('eosio.token'))
+def gen_symbolic_value(var_type, name):
+    if var_type == bin_format.i32:
+        return z3.BitVec(name, 32)
+    if var_type == bin_format.i64:
+        return z3.BitVec(name, 64)
+    if var_type == bin_format.f32:
+        return z3.FP(f'f32_{i}', z3.Float32())
+    if var_type == bin_format.f64:
+        return z3.FP(name, z3.Float64())
+    raise TypeError('Unsupported variable type')
