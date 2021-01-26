@@ -31,6 +31,7 @@ The main components of WANA is as follow.
   + `bin_format.py` and `bin_reader.py` include bytecode binary representation and reading approach respectively.
   + `structure.py` and `runtime.py` represent WebAssembly bytecode structure and virtual machine runtime structure.
   + `number.py`, `utils.py` and `logger.py` are helper modules.
+  + `emulator.py` is the module for library function emulating.
   
 ## Prerequisites
 The following Python packages are required.

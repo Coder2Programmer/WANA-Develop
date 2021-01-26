@@ -7,8 +7,13 @@ import bin_format
 import utils
 
 
-# Data reading functions
+
 def get_generator():
+    """A generator for symbolic variable generating.
+
+    Returns:
+        Generator: A generator.
+    """
     cur = 0
     while True:
         yield cur
@@ -16,7 +21,12 @@ def get_generator():
 
 
 class EosEmulator:
+    """A emulator of library functions of EOS.IO blockchain platform.
+    """
     counter = get_generator()
+
+    def __init__(self):
+        pass
 
     # Assert function
     @classmethod
@@ -583,7 +593,13 @@ class EosEmulator:
 
 
 class EthereumEmulator:
+    """A emulator of library functions of Ethereum Wasm blockchain platform.
+    """
+
     counter = get_generator()
+
+    def __init__(self):
+        pass
 
     @classmethod
     def useGas(cls, args):
@@ -718,6 +734,7 @@ class EthereumEmulator:
         pass
 
 
+# The map of module-name to function.
 function_map = {
     'env': {
         'assert_recover_key': EosEmulator.assert_recover_key,
